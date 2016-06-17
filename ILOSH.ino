@@ -24,6 +24,10 @@
 #include <BME280_MOD-1022.h>
 #include <Wire.h>
 #include <LGPS.h>
+#include <LBattery.h>
+#define BATTERY_FULL 100
+#define BATTERY_HALF 66
+#define BATTERY_LOW 33
 
 short fix_num = 15;			// 15 for fake GPS, who don't have GPS module
 
@@ -203,7 +207,30 @@ void MyBME(){
 	Serial.println(embient_pressure); // use double calculations
 }
 
+int Battery(){
+	int batteryStatus = 0;
+	int batteryLevel = LBattery.level();
+	if(batteryLevel == BATTERY_FULL){
+		batteryStatus = 3;
+	}
+	else if(batteryLevel == BATTERY_HALF){
+		batteryStatus = 2;
+	}
+	else if(batteryLevel == BATTERY_LOW){
+		batteryStatus = 1;
+	}
+	else{	//should be empty or ..... error XD
+		batteryStatus = 0;
+	}
+	return batteryStatus;	
+}
+
 void LoRaBitMap(){
+	/* 
+	 *  You can refer to: http://labs.mediatek.com/fileMedia/download/5fed7907-b2ba-4000-bcb2-016a332a49fd
+	 *  to see the bits # of different data types (is not like Arduino)
+	*/
+	byte batteryLv = Battery();
 	short temperatureLora = (short)((temperature+20)*10);
 	Serial.println("temperature: ");
 	Serial.println(temperatureLora);
@@ -260,7 +287,8 @@ void LoRaBitMap(){
 	byte gps_fix = fix_num;
 	char lora_buff[150];
 	
-	lora_trans[0] = (app_id << 4) | (temperatureLora >> 6); 
+//	lora_trans[0] = (app_id << 4) | (temperatureLora >> 6);
+	lora_trans[0] = (app_id << 6) | (batteryLv << 4) | (temperatureLora >> 6); 
 	lora_trans[1] = (temperatureLora << 2) | (humiditylora >> 8);
 	lora_trans[2] = humiditylora;
 	// END FOR THE APP_ID, TEMPERATURE AND HUMIDITY
