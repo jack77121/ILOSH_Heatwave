@@ -40,7 +40,9 @@ float embient_pressure = 0;
 
 gpsSentenceInfoStruct info;
 char buff[256];
-
+unsigned long currentTime = 0;
+unsigned long pendingTime = 0;
+unsigned long lastDataTrans = 0;
 /*  
 *	GPS example for IIS NRL, Academia Sinica in Taipei, Taiwan.
 * 	Using DMS format: 
@@ -55,6 +57,8 @@ char gps_lon[20]; // device's gps longitude
 double latitude;
 double longitude;
 short tmp, hour, minute, second, num;
+
+
 
 // copy from cmaglie on:
 //https://github.com/arduino/Arduino/blob/a2e7413d229812ff123cb8864747558b270498f1/hardware/arduino/sam/cores/arduino/avr/dtostrf.c
@@ -231,6 +235,8 @@ void LoRaBitMap(){
 	 *  to see the bits # of different data types (is not like Arduino)
 	*/
 	byte batteryLv = Battery();
+	Serial.print("Battery level: ");
+	Serial.println(batteryLv);
 	short temperatureLora = (short)((temperature+20)*10);
 	Serial.println("temperature: ");
 	Serial.println(temperatureLora);
@@ -339,20 +345,21 @@ void setup() {
 
 void loop() {
 	// put your main code here, to run repeatedly:
-	
-	
-	
 	Serial.println("LGPS loop"); 
 	LGPS.getData(&info);
 	Serial.println((char*)info.GPGGA); 
 	parseGPGGA((const char*)info.GPGGA);
-	delay(2000);
 	MyBME();
-	delay(2000);
+	currentTime = millis();
+	Serial.print("finished time: ");
+	Serial.println(currentTime);
 	
 	LoRaBitMap();
-
-
+	lastDataTrans = millis();
+	do{
+		currentTime = millis();
+		pendingTime = currentTime - lastDataTrans;
+	}while(pendingTime < 60200);
 	
 }
 
