@@ -356,10 +356,11 @@ void loop() {
 	
 	LoRaBitMap();
 	lastDataTrans = millis();
+	
 	do{
 		currentTime = millis();
 		pendingTime = currentTime - lastDataTrans;
-	}while(pendingTime < 60200);
+	}while(pendingTime < 60500);
 	
 }
 
