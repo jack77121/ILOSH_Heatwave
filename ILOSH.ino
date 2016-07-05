@@ -25,6 +25,8 @@
 #include <Wire.h>
 #include <LGPS.h>
 #include <LBattery.h>
+#include <LSD.h>
+#include <LStorage.h>
 #define BATTERY_FULL 100
 #define BATTERY_HALF 66
 #define BATTERY_LOW 33
@@ -313,6 +315,21 @@ void LoRaBitMap(){
 	lora_trans[5], lora_trans[6], lora_trans[7], lora_trans[8], lora_trans[9], lora_trans[10]);
 	Serial1.print(lora_buff);
 	Serial.println(lora_buff);
+  write_SD(lora_buff);
+}
+
+void write_SD(char buff[]) {
+  LFile dataFile = LSD.open("datalog.txt", FILE_WRITE);
+  if (dataFile) {
+    dataFile.println(buff);
+    dataFile.close();
+    // print to the serial port too:
+    Serial.println("write success");
+  }
+  // if the file isn't open, pop up an error:
+  else {
+    Serial.println("error opening datalog.txt");
+  }
 }
 
 
@@ -337,7 +354,11 @@ void setup() {
 	BME280.writeOversamplingPressure(os1x);  // 1x over sampling (ie, just one sample)
 	BME280.writeOversamplingTemperature(os1x);
 	BME280.writeOversamplingHumidity(os1x);
-	
+
+  Serial.print("Initializing SD card...");
+  pinMode(10, OUTPUT);//needed for SD card
+  LSD.begin();
+  Serial.println("card initialized.");
 	
 	Serial.println("start");
 
