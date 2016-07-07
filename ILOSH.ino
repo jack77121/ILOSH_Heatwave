@@ -318,10 +318,21 @@ void LoRaBitMap(){
   write_SD(lora_buff);
 }
 
-void write_SD(char buff[]) {
-  LFile dataFile = LSD.open("datalog.txt", FILE_WRITE);
+void write_SD(char sdbuff[]) {
+
+  String fileName = String(hour);
+  fileName += ".txt";
+  char namebuff[20];
+  fileName.toCharArray(namebuff,20);
+  
+  //LFile dataFile = LSD.open("datalog.txt", FILE_WRITE);
+  LFile dataFile = LSD.open(namebuff, FILE_WRITE);// create new file every hour
+  
   if (dataFile) {
-    dataFile.println(buff);
+    char tempbuff[150];
+    sprintf(tempbuff, "UTC timer %2d-%2d-%2d:", hour, minute, second);
+    dataFile.print(tempbuff);
+    dataFile.println(sdbuff);
     dataFile.close();
     // print to the serial port too:
     Serial.println("write success");
