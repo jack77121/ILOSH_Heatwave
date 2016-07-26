@@ -319,6 +319,8 @@ void LoRaBitMap(){
 }
 
 void write_SD(char sdbuff[]) {
+  if(LBattery.isCharging())
+    return;
 
   String fileName = String(hour);
   fileName += ".txt";
